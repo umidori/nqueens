@@ -4,26 +4,15 @@ using System.Linq;
 
 class Queens
 {
-    public static void Main (string[] args) {
-        Console.WriteLine(string.Join("\n", from x in nqueens(int.Parse(args[0])) select string.Join(" ", from y in x select y.ToString())));
-    }
-
-    private static IEnumerable<List<int>> nqueens(int size) {
-        Func<int, IEnumerable<List<int>>> queen = null;
-        queen = n => {
-            if (n <= 0) {
-                return new List<List<int>>() { new List<int>() };
-            } else {
-                return from x in queen(n-1) from y in Enumerable.Range(1, size) where !x.Contains(y) && !(from i in Enumerable.Range(0, x.Count) select x.Count-i-Math.Abs(y-x[i])).Contains(0) select Concat(x, y);
-            }
-        };
-        return queen(size);
-    }
-
-    private static List<int> Concat(List<int> x, int y) {
-        var a = new List<int>();
-        a.AddRange(x);
-        a.Add(y);
-        return a;
-    }
+	public static void Main(string[] args) {
+		Func<int, IEnumerable<IEnumerable<int>>> nqueens = size => {
+			Func<int, IEnumerable<IEnumerable<int>>> queen = null;
+			queen = n =>
+				n <= 0 ?
+				new [] {new int [] {}} :
+				queen(n-1).SelectMany(a => Enumerable.Range(1, size).Where(b => !a.Contains(b) && !a.Select((c, i) => a.Count()-i-Math.Abs(b-c)).Contains(0)), (a, b) => a.Concat(new [] {b}));
+			return queen(size);
+		};
+		Console.WriteLine(string.Join("\n", nqueens(int.Parse(args[0])).Select(x => string.Join(" ", x))));
+	}
 }
